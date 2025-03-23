@@ -6,6 +6,7 @@ import (
 	"backend/internal/middleware"
 	"backend/internal/repository"
 	"backend/internal/service/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -51,28 +52,41 @@ func main() {
 
 	// Настраиваем маршрутизацию
 	router := gin.Default()
-
-	// Группа маршрутов для устройств
-	deviceRoutes := router.Group("/devices")
-	deviceRoutes.Use(middleware.JwtMiddleware())
+	router.Use(func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	})
+	// Группа маршрутов с префиксом /api
+	api := router.Group("/api")
 	{
-		deviceRoutes.GET("", deviceHandler.GetDevices)
-		deviceRoutes.GET("/:id", deviceHandler.GetDeviceByID)
-		deviceRoutes.POST("", deviceHandler.AddDevice)
-		deviceRoutes.PUT("/:id", deviceHandler.UpdateDevice)
-		deviceRoutes.DELETE("/:id", deviceHandler.DeleteDevice)
-	}
+		// Группа маршрутов для устройств
+		deviceRoutes := api.Group("/devices")
+		deviceRoutes.Use(middleware.JwtMiddleware())
+		{
+			deviceRoutes.GET("", deviceHandler.GetDevices)
+			deviceRoutes.GET("/:id", deviceHandler.GetDeviceByID)
+			deviceRoutes.POST("", deviceHandler.AddDevice)
+			deviceRoutes.PUT("/:id", deviceHandler.UpdateDevice)
+			deviceRoutes.DELETE("/:id", deviceHandler.DeleteDevice)
+		}
 
-	// Группа маршрутов для телеметрии
-	telemetryRoutes := router.Group("/devices/:id/telemetry").Use(middleware.JwtMiddleware())
-	{
-		telemetryRoutes.GET("", telemetryHandler.GetTelemetry)
-		telemetryRoutes.POST("", telemetryHandler.AddTelemetry)
-		telemetryRoutes.DELETE("/:telemetryId", telemetryHandler.DeleteTelemetry)
-	}
+		// Группа маршрутов для телеметрии
+		telemetryRoutes := api.Group("/devices/:id/telemetry").Use(middleware.JwtMiddleware())
+		{
+			telemetryRoutes.GET("", telemetryHandler.GetTelemetry)
+			telemetryRoutes.POST("", telemetryHandler.AddTelemetry)
+			telemetryRoutes.DELETE("/:telemetryId", telemetryHandler.DeleteTelemetry)
+		}
 
-	// Маршрут для аутентификации
-	router.POST("/auth/login", authHandler.Login)
+		// Маршрут для аутентификации
+		api.POST("/auth/login", authHandler.Login)
+	}
 
 	// Запускаем сервер
 	if err := router.Run(":8080"); err != nil {
