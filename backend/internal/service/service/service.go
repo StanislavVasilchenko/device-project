@@ -4,7 +4,7 @@ import (
 	"backend/internal/models"
 	"backend/internal/repository"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"time"
 )
@@ -106,19 +106,22 @@ func (s *userService) Authenticate(username, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	// В реальном приложении пароль должен быть хэширован и проверен с помощью bcrypt или аналогичной библиотеки.
 	if user.Password != password {
 		return "", errors.New("invalid credentials")
 	}
 
-	// Генерация JWT-токена
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = user.Username
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() // Токен действителен 24 часа
+	claims := jwt.MapClaims{
+		"username": user.Username,
+		"exp":      jwt.NewNumericDate(time.Now().Add(24 * time.Hour)), // Токен действителен 24 часа
+	}
 
-	// Подписываем токен с использованием секретного ключа
-	tokenString, err := token.SignedString([]byte(os.Getenv("SECRET_JWT_KEY")))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", errors.New("JWT secret key not configured")
+	}
+
+	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		return "", errors.New("failed to generate token")
 	}

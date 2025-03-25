@@ -32,7 +32,7 @@ const DeviceDetails = () => {
 
     return (
         <div>
-            <h1>Устройство: {device.serial_number}</h1>
+            <h1>Устройство: {device.serialNumber}</h1>
             <p>Модель: {device.model}</p>
             <p>Адрес: {device.address}</p>
             <button onClick={() => navigate(`/devices/${id}/edit`)}>Редактировать</button>
