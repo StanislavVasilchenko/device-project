@@ -1,17 +1,36 @@
 package main
 
 import (
+	_ "backend/docs"
 	"backend/internal/database"
 	"backend/internal/handlers"
 	"backend/internal/middleware"
 	"backend/internal/repository"
 	"backend/internal/service/service"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 )
 
+// @title API для управления устройствами
+// @version 1.0
+// @description API для работы с устройствами и их телеметрией
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.email support@devices.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /api
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 
 	host := os.Getenv("DB_HOST")
@@ -49,6 +68,8 @@ func main() {
 		}
 		c.Next()
 	})
+	url := ginSwagger.URL("/swagger/doc.json")
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	api := router.Group("/api")
 	{

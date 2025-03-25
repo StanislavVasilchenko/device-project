@@ -1,0 +1,460 @@
+basePath: /api
+definitions:
+  models.Device:
+    properties:
+      address:
+        description: |-
+          Адрес установки устройства
+          example: ул. Примерная, 123
+        type: string
+      id:
+        description: |-
+          ID устройства
+          example: 1
+        type: integer
+      model:
+        description: |-
+          Модель устройства
+          example: Model X
+        type: string
+      serialNumber:
+        description: |-
+          Серийный номер устройства
+          example: SN123456
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        description: |-
+          Пароль пользователя
+          example: password123
+        type: string
+      username:
+        description: |-
+          Имя пользователя
+          example: admin
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      token:
+        description: |-
+          JWT токен для аутентификации
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  models.Telemetry:
+    properties:
+      deviceId:
+        description: |-
+          ID устройства
+          example: 1
+        type: integer
+      humidity:
+        description: |-
+          Влажность
+          example: 60.0
+        type: number
+      id:
+        description: |-
+          ID записи телеметрии
+          example: 1
+        type: integer
+      temperature:
+        description: |-
+          Температура
+          example: 25.5
+        type: number
+      timestamp:
+        description: |-
+          Временная метка записи
+          example: 2023-01-01T12:00:00Z
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@devices.com
+    name: API Support
+  description: API для работы с устройствами и их телеметрией
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: API для управления устройствами
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Вход в систему и получение JWT токена
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - Аутентификация
+  /devices:
+    get:
+      consumes:
+      - application/json
+      description: Получить список устройств с пагинацией и фильтрацией
+      parameters:
+      - description: Фильтр по серийному номеру
+        in: query
+        name: serialNumber
+        type: string
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Количество записей на странице
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Device'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список устройств
+      tags:
+      - Устройства
+    post:
+      consumes:
+      - application/json
+      description: Создать новое устройство в системе
+      parameters:
+      - description: Данные устройства
+        in: body
+        name: device
+        required: true
+        schema:
+          $ref: '#/definitions/models.Device'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить новое устройство
+      tags:
+      - Устройства
+  /devices/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить устройство из системы
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить устройство
+      tags:
+      - Устройства
+    get:
+      consumes:
+      - application/json
+      description: Получить детальную информацию об устройстве
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Device'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить устройство по ID
+      tags:
+      - Устройства
+    put:
+      consumes:
+      - application/json
+      description: Обновить информацию об устройстве
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновленные данные устройства
+        in: body
+        name: device
+        required: true
+        schema:
+          $ref: '#/definitions/models.Device'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить устройство
+      tags:
+      - Устройства
+  /devices/{id}/telemetry:
+    get:
+      consumes:
+      - application/json
+      description: Получить данные телеметрии за указанный период
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Начальная дата (YYYY-MM-DD)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: Конечная дата (YYYY-MM-DD)
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Telemetry'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить телеметрию устройства
+      tags:
+      - Телеметрия
+    post:
+      consumes:
+      - application/json
+      description: Добавить новую запись телеметрии для устройства
+      parameters:
+      - description: Данные телеметрии
+        in: body
+        name: telemetry
+        required: true
+        schema:
+          $ref: '#/definitions/models.Telemetry'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить данные телеметрии
+      tags:
+      - Телеметрия
+  /devices/{id}/telemetry/{telemetryId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удалить запись телеметрии по ID
+      parameters:
+      - description: ID записи телеметрии
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить запись телеметрии
+      tags:
+      - Телеметрия
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
