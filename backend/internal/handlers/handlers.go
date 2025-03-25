@@ -19,7 +19,20 @@ func NewDeviceHandler(service service.DeviceService) *DeviceHandler {
 	return &DeviceHandler{service: service}
 }
 
-// GetDevices возвращает список устройств.
+// GetDevices godoc
+// @Summary Получить список устройств
+// @Description Получить список устройств с пагинацией и фильтрацией
+// @Tags Устройства
+// @Accept json
+// @Produce json
+// @Param serialNumber query string false "Фильтр по серийному номеру"
+// @Param page query int false "Номер страницы" default(1)
+// @Param limit query int false "Количество записей на странице" default(10)
+// @Security ApiKeyAuth
+// @Success 200 {array} models.Device
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices [get]
 func (h *DeviceHandler) GetDevices(c *gin.Context) {
 	// Получаем параметры запроса
 	filter := make(map[string]string)
@@ -41,7 +54,19 @@ func (h *DeviceHandler) GetDevices(c *gin.Context) {
 	c.JSON(http.StatusOK, devices)
 }
 
-// GetDeviceByID возвращает устройство по его ID.
+// GetDeviceByID godoc
+// @Summary Получить устройство по ID
+// @Description Получить детальную информацию об устройстве
+// @Tags Устройства
+// @Accept json
+// @Produce json
+// @Param id path int true "ID устройства"
+// @Security ApiKeyAuth
+// @Success 200 {object} models.Device
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id} [get]
 func (h *DeviceHandler) GetDeviceByID(c *gin.Context) {
 	id := c.Param("id")
 	deviceID, err := strconv.Atoi(id)
@@ -59,7 +84,18 @@ func (h *DeviceHandler) GetDeviceByID(c *gin.Context) {
 	c.JSON(http.StatusOK, device)
 }
 
-// AddDevice добавляет новое устройство.
+// AddDevice godoc
+// @Summary Добавить новое устройство
+// @Description Создать новое устройство в системе
+// @Tags Устройства
+// @Accept json
+// @Produce json
+// @Param device body models.Device true "Данные устройства"
+// @Security ApiKeyAuth
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices [post]
 func (h *DeviceHandler) AddDevice(c *gin.Context) {
 	var device models.Device
 	if err := c.ShouldBindJSON(&device); err != nil {
@@ -75,7 +111,20 @@ func (h *DeviceHandler) AddDevice(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "device added"})
 }
 
-// UpdateDevice обновляет существующее устройство.
+// UpdateDevice godoc
+// @Summary Обновить устройство
+// @Description Обновить информацию об устройстве
+// @Tags Устройства
+// @Accept json
+// @Produce json
+// @Param id path int true "ID устройства"
+// @Param device body models.Device true "Обновленные данные устройства"
+// @Security ApiKeyAuth
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id} [put]
 func (h *DeviceHandler) UpdateDevice(c *gin.Context) {
 	id := c.Param("id")
 	deviceID, err := strconv.Atoi(id)
@@ -100,7 +149,19 @@ func (h *DeviceHandler) UpdateDevice(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "device updated"})
 }
 
-// DeleteDevice удаляет устройство по его ID.
+// DeleteDevice godoc
+// @Summary Удалить устройство
+// @Description Удалить устройство из системы
+// @Tags Устройства
+// @Accept json
+// @Produce json
+// @Param id path int true "ID устройства"
+// @Security ApiKeyAuth
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id} [delete]
 func (h *DeviceHandler) DeleteDevice(c *gin.Context) {
 	id := c.Param("id")
 	deviceID, err := strconv.Atoi(id)
@@ -127,7 +188,20 @@ func NewTelemetryHandler(service service.TelemetryService) *TelemetryHandler {
 	return &TelemetryHandler{service: service}
 }
 
-// GetTelemetry возвращает телеметрию устройства за указанный период.
+// GetTelemetry godoc
+// @Summary Получить телеметрию устройства
+// @Description Получить данные телеметрии за указанный период
+// @Tags Телеметрия
+// @Accept json
+// @Produce json
+// @Param id path int true "ID устройства"
+// @Param start query string true "Начальная дата (YYYY-MM-DD)"
+// @Param end query string true "Конечная дата (YYYY-MM-DD)"
+// @Security ApiKeyAuth
+// @Success 200 {array} models.Telemetry
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id}/telemetry [get]
 func (h *TelemetryHandler) GetTelemetry(c *gin.Context) {
 	id := c.Param("id")
 	deviceID, err := strconv.Atoi(id)
@@ -148,7 +222,18 @@ func (h *TelemetryHandler) GetTelemetry(c *gin.Context) {
 	c.JSON(http.StatusOK, telemetry)
 }
 
-// AddTelemetry добавляет новую запись телеметрии.
+// AddTelemetry godoc
+// @Summary Добавить данные телеметрии
+// @Description Добавить новую запись телеметрии для устройства
+// @Tags Телеметрия
+// @Accept json
+// @Produce json
+// @Param telemetry body models.Telemetry true "Данные телеметрии"
+// @Security ApiKeyAuth
+// @Success 201 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id}/telemetry [post]
 func (h *TelemetryHandler) AddTelemetry(c *gin.Context) {
 	var telemetry models.Telemetry
 	if err := c.ShouldBindJSON(&telemetry); err != nil {
@@ -164,7 +249,19 @@ func (h *TelemetryHandler) AddTelemetry(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "telemetry added"})
 }
 
-// DeleteTelemetry удаляет запись телеметрии по её ID.
+// DeleteTelemetry godoc
+// @Summary Удалить запись телеметрии
+// @Description Удалить запись телеметрии по ID
+// @Tags Телеметрия
+// @Accept json
+// @Produce json
+// @Param id path int true "ID записи телеметрии"
+// @Security ApiKeyAuth
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /devices/{id}/telemetry/{telemetryId} [delete]
 func (h *TelemetryHandler) DeleteTelemetry(c *gin.Context) {
 	id := c.Param("id")
 	telemetryID, err := strconv.Atoi(id)
@@ -191,7 +288,17 @@ func NewAuthHandler(service service.UserService) *AuthHandler {
 	return &AuthHandler{service: service}
 }
 
-// Login выполняет аутентификацию пользователя и возвращает JWT-токен.
+// Login godoc
+// @Summary Аутентификация пользователя
+// @Description Вход в систему и получение JWT токена
+// @Tags Аутентификация
+// @Accept json
+// @Produce json
+// @Param credentials body models.LoginRequest true "Данные для входа"
+// @Success 200 {object} models.LoginResponse
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var loginRequest models.LoginRequest
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
