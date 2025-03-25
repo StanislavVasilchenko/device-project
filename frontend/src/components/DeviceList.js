@@ -34,7 +34,7 @@ const DeviceList = () => {
             <ul>
                 {devices.map((device) => (
                     <li key={device.id}>
-                        {device.serial_number} - {device.model}
+                        {device.serialNumber} - {device.model}
                         <button onClick={() => navigate(`/devices/${device.id}`)}>Подробнее</button>
                         <button onClick={() => handleDelete(device.id)}>Удалить</button>
                     </li>
