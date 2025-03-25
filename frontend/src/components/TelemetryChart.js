@@ -7,7 +7,7 @@ const TelemetryChart = () => {
     const { id } = useParams();
     const [telemetry, setTelemetry] = useState([]);
     const [startDate, setStartDate] = useState("2023-01-01");
-    const [endDate, setEndDate] = useState("2023-12-31");
+    const [endDate, setEndDate] = useState("2023-01-31");
 
     const fetchTelemetry = async () => {
         try {
